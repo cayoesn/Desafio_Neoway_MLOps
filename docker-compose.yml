@@ -1,29 +1,57 @@
 version: '3.7'
 services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:6
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   airflow:
     build:
       context: .
       dockerfile: Dockerfile.airflow
     depends_on:
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >
+        postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      INPUT_CSV: /opt/airflow/data/novas_empresas.csv
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SPARK_MASTER: local[2]
     volumes:
       - ./dags:/opt/airflow/dags
       - ./src:/opt/airflow/src
+      - ./data:/opt/airflow/data
     ports:
       - "8080:8080"
     command: >
       bash -c "airflow db init &&
-               airflow scheduler & 
+               airflow scheduler &
                airflow webserver"
 
   tests:
@@ -33,3 +61,5 @@ services:
     volumes:
       - ./:/app
 
+volumes:
+  postgres_db:
