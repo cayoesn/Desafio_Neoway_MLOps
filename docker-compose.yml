@@ -36,8 +36,7 @@ services:
         condition: service_healthy
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >
-        postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: "postgresql+psycopg2://airflow:airflow@postgres:5432/airflow"
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
       INPUT_CSV: /opt/airflow/data/novas_empresas.csv
       REDIS_HOST: redis
