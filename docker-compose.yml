@@ -1,0 +1,35 @@
+version: '3.7'
+services:
+  redis:
+    image: redis:6
+    ports:
+      - "6379:6379"
+
+  airflow:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    depends_on:
+      - redis
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
+    ports:
+      - "8080:8080"
+    command: >
+      bash -c "airflow db init &&
+               airflow scheduler & 
+               airflow webserver"
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    volumes:
+      - ./:/app
+

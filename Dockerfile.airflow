@@ -1,0 +1,16 @@
+FROM apache/airflow:2.5.1-python3.8
+
+USER root
+
+# Copia código do pacote e instala em editable mode
+COPY setup.py /opt/airflow/setup.py
+COPY src/ /opt/airflow/src/
+WORKDIR /opt/airflow
+RUN pip install --no-cache-dir -e .
+
+# Ajusta permissões e volta ao usuário airflow
+RUN chown -R airflow: /opt/airflow
+USER airflow
+
+# Copia DAGs
+COPY dags/ /opt/airflow/dags
