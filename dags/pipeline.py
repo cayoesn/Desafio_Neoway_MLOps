@@ -1,26 +1,30 @@
+import redis
 import os
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.models import Variable
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
-
 from features.feature_engineering import process as run_feature_engineering
 
+def redis_health_check(**context):
+    try:
+        r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, socket_connect_timeout=5)
+        if not r.ping():
+            raise Exception("Redis ping failed")
+    except Exception as e:
+        raise Exception(f"Erro ao conectar ao Redis: {e}")
+
 def get_input_csv(context=None):
-    # 1. Tenta pegar do parâmetro dag_run.conf
     if context and context.get('dag_run') and context['dag_run'].conf.get('input_csv'):
         return context['dag_run'].conf.get('input_csv')
-    # 2. Tenta pegar da Variable do Airflow
     try:
         return Variable.get("input_csv")
     except Exception:
         pass
-    # 3. Tenta pegar do ENV
     env_val = os.getenv("INPUT_CSV")
     if env_val:
         return env_val
-    # 4. Valor padrão
     return "/opt/airflow/data/novas_empresas.csv"
 
 INPUT_CSV = get_input_csv()
@@ -30,10 +34,10 @@ REDIS_PORT = int(Variable.get("redis_port", os.getenv("REDIS_PORT", 6379)))
 default_args = {
     "owner": "neoway",
     "depends_on_past": False,
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 1,
-    "retry_delay": timedelta(minutes=5),
+    "email_on_failure": True,
+    "email_on_retry": True,
+    "retries": 3,
+    "retry_delay": timedelta(minutes=2),
 }
 
 def process_features(**context):
@@ -59,10 +63,20 @@ with DAG(
         bash_command='echo "Início do pipeline de Inteligência de Mercado."'
     )
 
+    healthcheck = PythonOperator(
+        task_id="healthcheck_redis",
+        python_callable=redis_health_check,
+        provide_context=True,
+        retries=2,
+        retry_delay=timedelta(seconds=30),
+    )
+
     processar = PythonOperator(
         task_id="processar_e_salvar_features",
         python_callable=process_features,
-        provide_context=True
+        provide_context=True,
+        retries=3,
+        retry_delay=timedelta(minutes=2),
     )
 
-    iniciar >> processar
+    iniciar >> healthcheck >> processar
