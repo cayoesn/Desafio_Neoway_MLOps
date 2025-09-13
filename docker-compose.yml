@@ -1,3 +1,5 @@
+version: "3.7"
+
 services:
   redis:
     image: redis:6
@@ -25,6 +27,14 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       SPARK_MASTER: local[2]
+      _AIRFLOW_WWW_USER_CREATE: "true"
+      _AIRFLOW_WWW_USER_USERNAME: "admin"
+      _AIRFLOW_WWW_USER_PASSWORD: "admin"
+      _AIRFLOW_WWW_USER_FIRSTNAME: "Admin"
+      _AIRFLOW_WWW_USER_LASTNAME: "User"
+      _AIRFLOW_WWW_USER_EMAIL: "admin@example.com"
+      _AIRFLOW_WWW_USER_ROLE: "Admin"
+
     volumes:
       - ./dags:/opt/airflow/dags
       - ./src:/opt/airflow/src

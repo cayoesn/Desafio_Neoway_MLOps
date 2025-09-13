@@ -12,4 +12,4 @@ COPY tests/ /app/tests/
 
 RUN pip3 install -r requirements.txt
 
-CMD ["pytest"]
+CMD ["pytest", "--maxfail=1", "--disable-warnings", "-q", "--cov=src", "--cov-report=term-missing"]

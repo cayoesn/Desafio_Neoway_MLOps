@@ -2,3 +2,6 @@
 pytest
 flake8
 black
+pytest-cov
+pyspark
+redis

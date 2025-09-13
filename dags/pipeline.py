@@ -2,13 +2,17 @@ from datetime import datetime, timedelta
 import os
 
 from airflow import DAG
+from airflow.models import Variable
 from airflow.operators.bash import BashOperator
+from airflow.operators.python import PythonOperator
 
-# Pega configurações via env vars
-INPUT_CSV   = os.getenv("INPUT_CSV", "/opt/airflow/data/novas_empresas.csv")
-REDIS_HOST  = os.getenv("REDIS_HOST", "redis")
-REDIS_PORT  = os.getenv("REDIS_PORT", "6379")
-SPARK_MASTER= os.getenv("SPARK_MASTER", "local[2]")
+# Importa a função main do seu módulo de feature engineering
+from features.feature_engineering import main as run_feature_engineering
+
+# Padrões: variáveis podem vir de Airflow Variables ou de env vars
+INPUT_CSV  = Variable.get("input_csv",  default_var=os.getenv("INPUT_CSV", "/opt/airflow/data/novas_empresas.csv"))
+REDIS_HOST = Variable.get("redis_host", default_var=os.getenv("REDIS_HOST", "redis"))
+REDIS_PORT = int(Variable.get("redis_port", default_var=os.getenv("REDIS_PORT", 6379)))
 
 default_args = {
     "owner": "neoway",
@@ -19,10 +23,20 @@ default_args = {
     "retry_delay": timedelta(minutes=5),
 }
 
+def process_features(**context):
+    """
+    Chamado pelo PythonOperator para rodar seu script de PySpark
+    """
+    run_feature_engineering(
+        input_csv=INPUT_CSV,
+        redis_host=REDIS_HOST,
+        redis_port=REDIS_PORT
+    )
+
 with DAG(
     dag_id="pipeline_inteligencia_mercado",
     default_args=default_args,
-    description="Pipeline de FE para novas empresas",
+    description="Calcula features por cidade e salva em Redis",
     start_date=datetime(2025, 9, 1),
     schedule_interval="@daily",
     catchup=False,
@@ -31,20 +45,13 @@ with DAG(
 
     iniciar = BashOperator(
         task_id="iniciar_processamento",
-        bash_command='echo "Iniciando pipeline de Inteligência de Mercado."'
+        bash_command='echo "Início do pipeline de Inteligência de Mercado"'
     )
 
-    processar = BashOperator(
+    processar = PythonOperator(
         task_id="processar_e_salvar_features",
-        bash_command=(
-            "spark-submit "
-            "--master {{ var.value.SPARK_MASTER | default('" + SPARK_MASTER + "') }} "
-            "--deploy-mode client "
-            "/opt/airflow/src/neoway_features/feature_engineering.py "
-            "--input-csv {{ var.value.INPUT_CSV  | default('" + INPUT_CSV + "') }} "
-            "--redis-host {{ var.value.REDIS_HOST | default('" + REDIS_HOST + "') }} "
-            "--redis-port {{ var.value.REDIS_PORT | default('" + REDIS_PORT + "') }}"
-        )
+        python_callable=process_features,
+        provide_context=True
     )
 
     iniciar >> processar
