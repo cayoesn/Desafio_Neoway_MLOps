@@ -1,0 +1,44 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, "feature/**"] # ou suas branches de trabalho
+
+jobs:
+  lint:
+    name: Linting with flake8
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+
+      - name: Install flake8
+        run: |
+          pip install --upgrade pip
+          pip install flake8
+
+      - name: Run flake8
+        run: |
+          flake8 src tests
+
+  test:
+    name: Build and run tests in Docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build test image
+        run: |
+          docker build \
+            --file Dockerfile.test \
+            --tag feature-test .
+
+      - name: Run pytest
+        run: |
+          docker run --rm feature-test pytest --maxfail=1 --disable-warnings -q
