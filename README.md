@@ -27,7 +27,7 @@ O pipeline lê arquivos CSV de empresas recém-abertas, calcula features agregad
 ## Como Executar o Projeto
 1. **Clone o repositório:**
 	```sh
-	git clone https://github.com/SEU_USUARIO/Desafio_Neoway_MLOps.git
+	git clone https://github.com/cayoesn/Desafio_Neoway_MLOps.git
 	cd Desafio_Neoway_MLOps
 	```
 2. **Suba o ambiente completo:**
