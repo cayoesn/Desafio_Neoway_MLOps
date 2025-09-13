@@ -3,6 +3,7 @@ version: "3.7"
 services:
   redis:
     image: redis:6
+    container_name: redis
     ports:
       - "6379:6379"
     healthcheck:
@@ -16,6 +17,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.airflow
+    container_name: airflow
     depends_on:
       redis:
         condition: service_healthy
@@ -34,7 +36,6 @@ services:
       _AIRFLOW_WWW_USER_LASTNAME: "User"
       _AIRFLOW_WWW_USER_EMAIL: "admin@example.com"
       _AIRFLOW_WWW_USER_ROLE: "Admin"
-
     volumes:
       - ./dags:/opt/airflow/dags
       - ./src:/opt/airflow/src
@@ -43,33 +44,31 @@ services:
       - "8080:8080"
     command: standalone
 
-  tests:
-    build:
-      context: .
-      dockerfile: Dockerfile.test
-    volumes:
-      - ./:/app
-
   redisinsight:
-    image: redis/redisinsight:latest       # imagem oficial Verified Publisher
+    image: redis/redisinsight:latest
     container_name: redisinsight
     depends_on:
       redis:
         condition: service_healthy
     ports:
-      - "5540:5540"                        # padrão RedisInsight Docker port
+      - "5540:5540"
     restart: unless-stopped
     volumes:
-      - redisinsight_data:/data           # persiste configurações e histórico
+      - redisinsight_data:/data
     environment:
-      # porta e host que o próprio RedisInsight vai usar
       - RI_APP_PORT=5540
       - RI_APP_HOST=0.0.0.0
-
-      # preconfigura a conexão ao Redis
-      - RI_REDIS_HOST=redis               # nome do serviço Redis no compose
+      - RI_REDIS_HOST=redis
       - RI_REDIS_PORT=6379
-      - RI_REDIS_ALIAS=neoway-redis       # rótulo que aparece na UI
+      - RI_REDIS_ALIAS=neoway-redis
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: tests
+    volumes:
+      - ./:/app
 
 volumes:
   redisinsight_data:
