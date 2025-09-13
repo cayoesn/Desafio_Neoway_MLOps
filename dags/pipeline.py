@@ -7,13 +7,16 @@ from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from features.feature_engineering import process as run_feature_engineering
 
+
 def redis_health_check(**context):
     try:
-        r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, socket_connect_timeout=5)
+        r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT,
+                        socket_connect_timeout=5)
         if not r.ping():
             raise Exception("Redis ping failed")
     except Exception as e:
         raise Exception(f"Erro ao conectar ao Redis: {e}")
+
 
 def get_input_csv(context=None):
     if context and context.get('dag_run') and context['dag_run'].conf.get('input_csv'):
@@ -26,6 +29,7 @@ def get_input_csv(context=None):
     if env_val:
         return env_val
     return "/opt/airflow/data/novas_empresas.csv"
+
 
 INPUT_CSV = get_input_csv()
 REDIS_HOST = Variable.get("redis_host", os.getenv("REDIS_HOST", "redis"))
@@ -40,6 +44,7 @@ default_args = {
     "retry_delay": timedelta(minutes=2),
 }
 
+
 def process_features(**context):
     input_csv = get_input_csv(context)
     run_feature_engineering(
@@ -47,6 +52,7 @@ def process_features(**context):
         redis_host=REDIS_HOST,
         redis_port=REDIS_PORT
     )
+
 
 with DAG(
     dag_id="pipeline_inteligencia_mercado",
