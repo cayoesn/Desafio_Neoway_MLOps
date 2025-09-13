@@ -1,7 +1,12 @@
 import logging
 import redis
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import sum as _sum, count as _count, round as _round, col
+from pyspark.sql.functions import (
+    sum as _sum,
+    count as _count,
+    round as _round,
+    col
+)
 
 
 def setup_logging():
