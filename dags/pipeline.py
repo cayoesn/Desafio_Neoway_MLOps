@@ -1,18 +1,31 @@
-from datetime import datetime, timedelta
 import os
-
+from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.models import Variable
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 
-# Importa a função main do seu módulo de feature engineering
-from features.feature_engineering import main as run_feature_engineering
+from features.feature_engineering import process as run_feature_engineering
 
-# Padrões: variáveis podem vir de Airflow Variables ou de env vars
-INPUT_CSV  = Variable.get("input_csv",  default_var=os.getenv("INPUT_CSV", "/opt/airflow/data/novas_empresas.csv"))
-REDIS_HOST = Variable.get("redis_host", default_var=os.getenv("REDIS_HOST", "redis"))
-REDIS_PORT = int(Variable.get("redis_port", default_var=os.getenv("REDIS_PORT", 6379)))
+def get_input_csv(context=None):
+    # 1. Tenta pegar do parâmetro dag_run.conf
+    if context and context.get('dag_run') and context['dag_run'].conf.get('input_csv'):
+        return context['dag_run'].conf.get('input_csv')
+    # 2. Tenta pegar da Variable do Airflow
+    try:
+        return Variable.get("input_csv")
+    except Exception:
+        pass
+    # 3. Tenta pegar do ENV
+    env_val = os.getenv("INPUT_CSV")
+    if env_val:
+        return env_val
+    # 4. Valor padrão
+    return "/opt/airflow/data/novas_empresas.csv"
+
+INPUT_CSV = get_input_csv()
+REDIS_HOST = Variable.get("redis_host", os.getenv("REDIS_HOST", "redis"))
+REDIS_PORT = int(Variable.get("redis_port", os.getenv("REDIS_PORT", 6379)))
 
 default_args = {
     "owner": "neoway",
@@ -24,11 +37,9 @@ default_args = {
 }
 
 def process_features(**context):
-    """
-    Chamado pelo PythonOperator para rodar seu script de PySpark
-    """
+    input_csv = get_input_csv(context)
     run_feature_engineering(
-        input_csv=INPUT_CSV,
+        input_csv=input_csv,
         redis_host=REDIS_HOST,
         redis_port=REDIS_PORT
     )
@@ -45,7 +56,7 @@ with DAG(
 
     iniciar = BashOperator(
         task_id="iniciar_processamento",
-        bash_command='echo "Início do pipeline de Inteligência de Mercado"'
+        bash_command='echo "Início do pipeline de Inteligência de Mercado."'
     )
 
     processar = PythonOperator(

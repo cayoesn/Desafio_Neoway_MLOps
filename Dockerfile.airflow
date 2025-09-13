@@ -1,10 +1,36 @@
 FROM apache/airflow:2.5.1-python3.8
 
 USER root
+
+# 1. Instala Java (JDK) para suportar PySpark
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      openjdk-11-jdk-headless && \
+    rm -rf /var/lib/apt/lists/*
+
+# Define JAVA_HOME para o Spark/PySpark
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+
+
+# 2. Instala pyspark e redis-py como airflow
+USER airflow
+RUN pip install --no-cache-dir \
+  pyspark \
+  redis
+USER root
+
+# (Opcional) Se você tiver outras deps em requirements.txt:
+# COPY requirements.txt /opt/airflow/
+# RUN pip install --no-cache-dir -r /opt/airflow/requirements.txt
+
+# 3. Copia e instala seu pacote Python
 COPY setup.py /opt/airflow/setup.py
 COPY src/ /opt/airflow/src/
 RUN chown -R airflow: /opt/airflow
+
 USER airflow
 WORKDIR /opt/airflow
 RUN pip install --no-cache-dir -e .
+
+# 4. Copia as DAGs
 COPY dags/ /opt/airflow/dags

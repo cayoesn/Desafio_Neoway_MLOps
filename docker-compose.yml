@@ -49,3 +49,27 @@ services:
       dockerfile: Dockerfile.test
     volumes:
       - ./:/app
+
+  redisinsight:
+    image: redis/redisinsight:latest       # imagem oficial Verified Publisher
+    container_name: redisinsight
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "5540:5540"                        # padrão RedisInsight Docker port
+    restart: unless-stopped
+    volumes:
+      - redisinsight_data:/data           # persiste configurações e histórico
+    environment:
+      # porta e host que o próprio RedisInsight vai usar
+      - RI_APP_PORT=5540
+      - RI_APP_HOST=0.0.0.0
+
+      # preconfigura a conexão ao Redis
+      - RI_REDIS_HOST=redis               # nome do serviço Redis no compose
+      - RI_REDIS_PORT=6379
+      - RI_REDIS_ALIAS=neoway-redis       # rótulo que aparece na UI
+
+volumes:
+  redisinsight_data:
