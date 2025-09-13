@@ -3,6 +3,7 @@ import pytest
 import sys
 import features.feature_engineering as feature_engineering
 
+
 @pytest.fixture(scope="session")
 def spark():
     from pyspark.sql import SparkSession
@@ -15,10 +16,12 @@ def spark():
     yield spark
     spark.stop()
 
+
 def test_setup_logging_returns_logger():
     logger = feature_engineering.setup_logging()
     assert isinstance(logger, logging.Logger)
     assert logger.name == "feature_engineering"
+
 
 def test_compute_features_correct_aggregation(spark):
     data = [
@@ -38,6 +41,7 @@ def test_compute_features_correct_aggregation(spark):
     assert rows["CidadeB"]["quantidade_empresas"] == 1
     assert rows["CidadeB"]["capital_social_medio"] == 30.0
 
+
 class FakeClient:
     def __init__(self):
         self.hset_calls = []
@@ -45,14 +49,17 @@ class FakeClient:
     def hset(self, key, mapping=None):
         self.hset_calls.append((key, mapping))
 
+
 class FakeRow:
     def __init__(self, cidade, total, qtd, medio):
         self.cidade = cidade
         self.capital_social_total = total
         self.quantidade_empresas = qtd
         self.capital_social_medio = medio
+
     def __getitem__(self, item):
         return getattr(self, item)
+
 
 class FakeDF:
     def __init__(self, rows):
@@ -60,6 +67,7 @@ class FakeDF:
 
     def collect(self):
         return self._rows
+
 
 def test_write_features_to_redis(monkeypatch, caplog):
     caplog.set_level(logging.INFO)
@@ -110,9 +118,11 @@ def test_process_reads_csv_and_writes(monkeypatch, tmp_path, caplog, spark):
         feature_engineering.redis, "Redis",
         lambda *args, **kwargs: fake_client
     )
+
     class Builder:
         def __init__(self, spark):
             self._spark = spark
+
         def appName(self, _): return self
         def getOrCreate(self): return self._spark
     monkeypatch.setattr(
@@ -141,7 +151,7 @@ def test_process_reads_csv_and_writes(monkeypatch, tmp_path, caplog, spark):
 
 
 def test_main_invokes_process(monkeypatch):
-    
+
     test_args = [
         "prog",
         "--input-csv", "arquivo.csv",
@@ -151,6 +161,7 @@ def test_main_invokes_process(monkeypatch):
     monkeypatch.setattr(sys, "argv", test_args)
 
     called = {}
+
     def fake_process(input_csv, redis_host, redis_port):
         called["args"] = (input_csv, redis_host, redis_port)
 
