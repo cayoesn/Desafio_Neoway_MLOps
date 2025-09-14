@@ -29,20 +29,18 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       SPARK_MASTER: local[2]
-      _AIRFLOW_WWW_USER_CREATE: "true"
-      _AIRFLOW_WWW_USER_USERNAME: "admin"
-      _AIRFLOW_WWW_USER_PASSWORD: "admin"
-      _AIRFLOW_WWW_USER_FIRSTNAME: "Admin"
-      _AIRFLOW_WWW_USER_LASTNAME: "User"
-      _AIRFLOW_WWW_USER_EMAIL: "admin@example.com"
-      _AIRFLOW_WWW_USER_ROLE: "Admin"
+      _AIRFLOW_WWW_USER_USERNAME: cayoesn
+      _AIRFLOW_WWW_USER_PASSWORD: 123456789
+      _AIRFLOW_WWW_USER_FIRSTNAME: Cayo
+      _AIRFLOW_WWW_USER_LASTNAME: Neves
+      _AIRFLOW_WWW_USER_EMAIL: cayo@example.com
     volumes:
       - ./dags:/opt/airflow/dags
       - ./src:/opt/airflow/src
       - ./data:/opt/airflow/data
     ports:
       - "8080:8080"
-    command: standalone
+    command: bash -c "airflow scheduler & airflow webserver"
 
   redisinsight:
     image: redis/redisinsight:latest
