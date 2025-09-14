@@ -77,22 +77,20 @@ def test_write_features_to_redis(sample_df, logger):
 def test_process(tmp_path, spark):
     csv_path = tmp_path / "test.csv"
     csv_path.write_text("cidade,capital_social\nA,100.0\nA,200.0\nB,300.0\n")
-    with (
-        mock.patch(
-            "features.feature_engineering.write_features_to_redis"
-        ) as mock_write,
-        mock.patch(
+    with mock.patch(
+        "features.feature_engineering.write_features_to_redis"
+    ) as mock_write:
+        with mock.patch(
             "features.feature_engineering.setup_logging"
-        ) as mock_logger
-    ):
-        feature_engineering.process(
-            str(csv_path),
-            redis_host="localhost",
-            redis_port=6379,
-            spark=spark,
-            logger=mock_logger
-        )
-        assert mock_write.called
+        ) as mock_logger:
+            feature_engineering.process(
+                str(csv_path),
+                redis_host="localhost",
+                redis_port=6379,
+                spark=spark,
+                logger=mock_logger
+            )
+            assert mock_write.called
 
 
 def test_main(monkeypatch):
