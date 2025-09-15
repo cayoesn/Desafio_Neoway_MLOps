@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e
 
 if [ ! -f "/opt/airflow/airflow.db" ]; then
