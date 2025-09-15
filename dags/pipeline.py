@@ -21,7 +21,7 @@ def redis_health_check(**context):
         if not r.ping():
             raise Exception("Redis ping failed")
     except Exception as e:
-        logging.error(f"Erro ao conectar ao Redis: {e}")
+        logging.error(f"Error connecting to Redis: {e}")
         raise
 
 
@@ -39,7 +39,6 @@ def get_input_csv(context=None):
 
 
 def process_features(**context):
-    """Executa o processamento de features."""
     input_csv = get_input_csv(context)
     host = get_env_variable("redis_host", "redis")
     port = int(get_env_variable("redis_port", 6379))
@@ -60,32 +59,32 @@ default_args = {
 }
 
 with DAG(
-    dag_id="pipeline_inteligencia_mercado",
+    dag_id="market_intelligence_pipeline",
     default_args=default_args,
-    description="Calcula features por cidade e salva em Redis",
+    description="Calculates features by city and saves to Redis",
     start_date=datetime(2025, 9, 1),
     schedule_interval="@daily",
     catchup=False,
     tags=["neoway", "mlops"],
 ) as dag:
 
-    iniciar = BashOperator(
-        task_id="iniciar_processamento",
-        bash_command='echo "Início do pipeline de Inteligência de Mercado."'
+    start = BashOperator(
+        task_id="start_processing",
+        bash_command='echo "Starting Market Intelligence pipeline."'
     )
 
     healthcheck = PythonOperator(
-        task_id="healthcheck_redis",
+        task_id="redis_healthcheck",
         python_callable=redis_health_check,
         retries=2,
         retry_delay=timedelta(seconds=30),
     )
 
-    processar = PythonOperator(
-        task_id="processar_e_salvar_features",
+    process = PythonOperator(
+        task_id="process_and_save_features",
         python_callable=process_features,
         retries=3,
         retry_delay=timedelta(minutes=2),
     )
 
-    iniciar >> healthcheck >> processar
+    start >> healthcheck >> process
