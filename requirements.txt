@@ -1,7 +1,9 @@
--e .
-pytest
-flake8
-black
-pytest-cov
-pyspark
-redis
+colorama==0.4.6
+iniconfig==2.1.0
+packaging==25.0
+pluggy==1.6.0
+py4j==0.10.9.9
+Pygments==2.19.2
+pyspark==4.0.1
+pytest==8.4.2
+redis==6.4.0

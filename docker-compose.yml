@@ -43,7 +43,7 @@ services:
     command: bash -c "airflow scheduler & airflow webserver"
 
   redisinsight:
-    image: redis/redisinsight:latest
+    image: redis/redisinsight:2.70
     container_name: redisinsight
     depends_on:
       redis:
