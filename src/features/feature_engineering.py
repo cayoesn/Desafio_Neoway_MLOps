@@ -1,5 +1,6 @@
 import logging
 import redis
+import argparse
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import (
     sum as _sum,
@@ -56,7 +57,8 @@ def compute_features(df: DataFrame, logger: logging.Logger) -> DataFrame:
 
 
 def write_features_to_redis(
-    df: DataFrame, host: str,
+    df: DataFrame,
+    host: str,
     port: int,
     logger: logging.Logger
 ) -> None:
@@ -102,7 +104,6 @@ def process(
 
 
 def main():
-    import argparse
     parser = argparse.ArgumentParser(
         description='Feature Engineering Pipeline')
     parser.add_argument('--input-csv', required=True)

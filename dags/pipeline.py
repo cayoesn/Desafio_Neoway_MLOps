@@ -16,6 +16,7 @@ def get_env_variable(var_name, default=None):
 def redis_health_check(**context):
     host = get_env_variable("redis_host", "redis")
     port = int(get_env_variable("redis_port", 6379))
+
     try:
         r = redis.Redis(host=host, port=port, socket_connect_timeout=5)
         if not r.ping():
@@ -50,7 +51,7 @@ def process_features(**context):
 
 
 default_args = {
-    "owner": "neoway",
+    "owner": "cayoesn",
     "depends_on_past": False,
     "email_on_failure": True,
     "email_on_retry": True,
@@ -65,7 +66,6 @@ with DAG(
     start_date=datetime(2025, 9, 1),
     schedule_interval="@daily",
     catchup=False,
-    tags=["neoway", "mlops"],
 ) as dag:
 
     start = BashOperator(
