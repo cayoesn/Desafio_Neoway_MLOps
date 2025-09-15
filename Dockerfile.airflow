@@ -15,7 +15,8 @@ RUN pip install --no-cache-dir \
     redis
 
 USER root
-COPY config/setup.py /opt/airflow/setup.py
+COPY src/features/setup.py /opt/airflow/setup.py
+COPY dags/setup.py /opt/airflow/setup.py
 COPY src/ /opt/airflow/src/
 RUN chown -R airflow: /opt/airflow
 

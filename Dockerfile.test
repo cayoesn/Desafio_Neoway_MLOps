@@ -6,10 +6,13 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-COPY config/setup.py requirements.txt /app/
-COPY src/ /app/src/
+COPY src/features/ /app/src/features/
+COPY dags/ /app/dags/
+COPY requirements.txt /app/
 COPY tests/ /app/tests/
 
+RUN pip3 install -e src/features/
+RUN pip3 install -e dags/
 RUN pip3 install -r requirements.txt
 
 CMD ["pytest", "--maxfail=1", "--disable-warnings", "-q", "--cov=src", "--cov-report=term-missing"]
