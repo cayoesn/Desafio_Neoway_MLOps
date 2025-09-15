@@ -32,11 +32,15 @@ def get_input_csv(context=None):
         and context.get('dag_run')
         and context['dag_run'].conf.get('input_csv')
     ):
-        return context['dag_run'].conf.get('input_csv')
-    return get_env_variable(
-        "input_csv",
-        "/opt/airflow/data/novas_empresas.csv"
-    )
+        input_csv = context['dag_run'].conf.get('input_csv')
+    else:
+        input_csv = get_env_variable(
+            "input_csv",
+            "/opt/airflow/data/novas_empresas.csv"
+        )
+    if not os.path.exists(input_csv):
+        raise FileNotFoundError(f"CSV file not found: {input_csv}")
+    return input_csv
 
 
 def process_features(**context):
