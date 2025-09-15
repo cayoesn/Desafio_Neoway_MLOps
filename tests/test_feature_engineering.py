@@ -69,8 +69,8 @@ def test_write_features_to_redis(sample_df, logger):
         feature_engineering.write_features_to_redis(
             features, "localhost", 6379, logger)
         assert client.hset.call_count == 2
-        calls = [mock.call("A", mapping=mock.ANY),
-                 mock.call("B", mapping=mock.ANY)]
+        calls = [mock.call("a", mapping=mock.ANY),
+                 mock.call("b", mapping=mock.ANY)]
         client.hset.assert_has_calls(calls, any_order=True)
 
 

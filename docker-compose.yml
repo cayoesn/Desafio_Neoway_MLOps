@@ -58,6 +58,7 @@ services:
       - RI_APP_HOST=0.0.0.0
       - RI_REDIS_HOST=redis
       - RI_REDIS_PORT=6379
+      - RI_REDIS_ALIAS=cayoesn-redis
 
   tests:
     build:

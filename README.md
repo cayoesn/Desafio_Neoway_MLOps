@@ -40,14 +40,15 @@ O pipeline lê arquivos CSV de empresas recém-abertas, calcula features agregad
 	- RedisInsight (UI em http://localhost:5540)
 
 3. **Acesse o Airflow:**
-	- Usuário: `admin`
-	- Senha: `admin` (ou veja nos logs do container Airflow)
+	- Usuário: `cayoesn`
+	- Senha: `123456789`
 
 4. **Execute a DAG**
 	- No Airflow, ative e execute a DAG `pipeline_inteligencia_mercado`.
 
 ## Testes
-Para rodar os testes unitários:
+
+Os testes unitários estão localizados na pasta `tests/` e são executados juntos no Docker Compose, mas caso queira rodar isoladamente, siga os passos abaixo.
 ```sh
 docker-compose run --rm tests
 ```
@@ -57,9 +58,9 @@ Os testes cobrem toda a lógica de feature engineering, incluindo agregações, 
 Após a execução da DAG, as features agregadas por cidade estarão salvas no Redis. Você pode inspecionar usando o RedisInsight (http://localhost:5540) ou via CLI:
 
 ```sh
-docker exec -it <nome_container_redis> redis-cli
+docker exec -it redis redis-cli
 keys *
-hgetall "São Paulo"
+hgetall "sao_paulo"
 ```
 Exemplo de saída esperada:
 ```
@@ -84,7 +85,3 @@ Ou defina a variável `input_csv` no Airflow, ou a env `INPUT_CSV`.
 O projeto possui pipeline de integração contínua via GitHub Actions:
 - Linting com flake8
 - Testes unitários em container Docker
-
----
-
-**Dúvidas ou sugestões?** Abra uma issue ou entre em contato!

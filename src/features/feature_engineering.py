@@ -1,6 +1,7 @@
 import logging
 import redis
 import argparse
+import unicodedata
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import (
     sum as _sum,
@@ -56,6 +57,16 @@ def compute_features(df: DataFrame, logger: logging.Logger) -> DataFrame:
     return features
 
 
+def _remove_accents(text: str) -> str:
+    nfkd = unicodedata.normalize('NFKD', text)
+    return ''.join(c for c in nfkd if not unicodedata.combining(c))
+
+
+def _normalize_key(text: str) -> str:
+    clean = _remove_accents(text)
+    return clean.strip().lower().replace(' ', '_')
+
+
 def write_features_to_redis(
     df: DataFrame,
     host: str,
@@ -67,7 +78,7 @@ def write_features_to_redis(
     logger.info("Writing features to Redis...")
     rows = df.collect()
     for row in rows:
-        key = row['cidade']
+        key = _normalize_key(row['cidade'])
         mapping = {
             'capital_social_total': str(row['capital_social_total']),
             'quantidade_empresas': str(row['quantidade_empresas']),
