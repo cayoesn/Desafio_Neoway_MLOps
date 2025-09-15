@@ -1,7 +1,7 @@
 set -e
 
 if [ ! -f "/opt/airflow/airflow.db" ]; then
-  echo ">>> Inicializando banco de dados do Airflow..."
+  echo ">>> Initializing Airflow database..."
   airflow db init
 fi
 
