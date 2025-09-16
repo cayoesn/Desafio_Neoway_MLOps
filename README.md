@@ -22,15 +22,16 @@ O pipeline lê arquivos CSV de empresas, gera features agregadas por cidade usan
 ## Estrutura do Projeto
 
 ```
-├── dags/                # DAG do Airflow
+├── src/dags/            # DAG do Airflow
 ├── src/features/        # Lógica de feature engineering
 ├── data/                # Dados de entrada (CSV)
 ├── tests/               # Testes unitários
-├── config/              # Scripts de setup e entrypoint
+├── config/              # Scripts de entrypoint
 ├── Dockerfile.airflow   # Imagem do Airflow
 ├── Dockerfile.test      # Imagem para testes
 ├── docker-compose.yml   # Orquestração dos serviços
 ├── requirements.txt     # Dependências Python
+├── setup.py             # Setup do pacote Python
 ```
 
 ## Serviços e Tecnologias
