@@ -1,6 +1,5 @@
 import logging
 import redis
-import argparse
 import unicodedata
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import (
