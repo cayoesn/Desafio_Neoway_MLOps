@@ -35,8 +35,8 @@ services:
       _AIRFLOW_WWW_USER_LASTNAME: Neves
       _AIRFLOW_WWW_USER_EMAIL: cayo@example.com
     volumes:
-      - ./dags:/opt/airflow/dags
-      - ./src:/opt/airflow/src
+      - ./src/dags:/opt/airflow/dags
+      - ./src/features:/opt/airflow/src/features
       - ./data:/opt/airflow/data
     ports:
       - "8080:8080"

@@ -1,7 +1,6 @@
 FROM apache/airflow:2.5.1-python3.8
 
 USER root
-
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     openjdk-11-jdk-headless && \
@@ -16,7 +15,9 @@ RUN pip install --no-cache-dir \
 
 USER root
 COPY setup.py /opt/airflow/setup.py
-COPY src/ /opt/airflow/src/
+COPY src/features/ /opt/airflow/src/features/
+COPY src/dags/ /opt/airflow/dags/
+
 RUN chown -R airflow: /opt/airflow
 
 USER airflow
