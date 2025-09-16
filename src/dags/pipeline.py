@@ -68,7 +68,7 @@ with DAG(
     default_args=default_args,
     description="Calculates features by city and saves to Redis",
     start_date=datetime(2025, 9, 1),
-    schedule_interval="@daily",
+    schedule="@daily",
     catchup=False,
 ) as dag:
 

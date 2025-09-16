@@ -15,16 +15,13 @@ RUN pip install --no-cache-dir \
     redis
 
 USER root
-COPY src/features/setup.py /opt/airflow/setup.py
-COPY dags/setup.py /opt/airflow/setup.py
+COPY setup.py /opt/airflow/setup.py
 COPY src/ /opt/airflow/src/
 RUN chown -R airflow: /opt/airflow
 
 USER airflow
 WORKDIR /opt/airflow
 RUN pip install --no-cache-dir -e .
-
-COPY dags/ /opt/airflow/dags
 
 USER root
 COPY config/entrypoint.sh /entrypoint.sh

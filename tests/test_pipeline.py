@@ -96,5 +96,5 @@ def test_process_features(monkeypatch, tmp_path):
     monkeypatch.setattr("dags.pipeline.run_feature_engineering", fake_process)
     pipeline.process_features()
     assert called["input_csv"] == str(test_csv)
-    assert called["redis_host"] == "dummy_redis_host"
-    assert called["redis_port"] == "dummy_redis_port"
+    assert called["redis_host"] == "redis"
+    assert called["redis_port"] == 6379

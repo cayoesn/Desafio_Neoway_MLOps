@@ -91,14 +91,3 @@ def test_process(tmp_path, spark):
                 logger=mock_logger
             )
             assert mock_write.called
-
-
-def test_main(monkeypatch):
-    args = ["prog", "--input-csv", "file.csv",
-            "--redis-host", "localhost", "--redis-port", "6380"]
-    with mock.patch(
-        "features.feature_engineering.process"
-    ) as mock_process:
-        monkeypatch.setattr("sys.argv", args)
-        feature_engineering.main()
-        mock_process.assert_called_once_with("file.csv", "localhost", 6380)

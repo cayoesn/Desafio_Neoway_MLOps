@@ -112,17 +112,3 @@ def process(
     finally:
         spark.stop()
         logger.info('SparkSession stopped.')
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description='Feature Engineering Pipeline')
-    parser.add_argument('--input-csv', required=True)
-    parser.add_argument('--redis-host', default='redis')
-    parser.add_argument('--redis-port', default=6379, type=int)
-    args = parser.parse_args()
-    process(args.input_csv, args.redis_host, args.redis_port)
-
-
-if __name__ == '__main__':
-    main()
