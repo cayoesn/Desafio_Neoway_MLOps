@@ -65,11 +65,21 @@ O pipeline lê arquivos CSV de empresas, gera features agregadas por cidade usan
 
 3. **Acesse o Airflow:**
 
+   - Na interface web do Airflow (http://localhost:8080), faça login com:
+
    - Usuário: `cayoesn`
    - Senha: `123456789`
 
 4. **Execute a DAG:**
+
    - Ative e execute a DAG `pipeline_inteligencia_mercado` na interface do Airflow.
+
+5. **Monitore o progresso:**
+
+   - Acompanhe os logs e status das tasks na interface do Airflow.
+
+6. **Verifique os dados no Redis:**
+   - Após a execução, inspecione os dados salvos no Redis (veja seção [Verificação no Redis](#verificação-no-redis)).
 
 ## Testes
 
@@ -83,7 +93,7 @@ Cobrem agregações, logging e escrita no Redis (mockado).
 
 ## Verificação no Redis
 
-Após rodar a DAG, as features por cidade ficam salvas no Redis. Inspecione via RedisInsight (http://localhost:5540) ou CLI:
+Após rodar a DAG, as features por cidade ficam salvas no Redis. Inspecione via RedisInsight (http://localhost:5540) no banco de dados `cayoesn-redis` ou CLI:
 
 ```sh
 docker exec -it redis redis-cli
